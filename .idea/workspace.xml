@@ -38,6 +38,11 @@
     "vue.rearranger.settings.migration": "true"
   }
 }]]></component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\kulka\PycharmProjects\smsspamdetector" />
+    </key>
+  </component>
   <component name="SharedIndexes">
     <attachedChunks>
       <set>
@@ -53,7 +58,7 @@
       <option name="number" value="Default" />
       <option name="presentableId" value="Default" />
       <updated>1745340815148</updated>
-      <workItem from="1745340816143" duration="759000" />
+      <workItem from="1745340816143" duration="1461000" />
     </task>
     <servers />
   </component>
