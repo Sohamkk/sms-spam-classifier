@@ -56,6 +56,7 @@ if st.button('Predict'):
 
     result = model.predict(vector_input)[0]
     st.write("Model Output:", result)
+    vectorizer = pickle.load(open("vectorizer.pkl", "rb"))  # This works if the file was fitted!
 
     if result == 1:
         st.error("🚨 Spam")

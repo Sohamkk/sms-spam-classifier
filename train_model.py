@@ -9,45 +9,46 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
-# Download necessary datasets
+# Download NLTK resources
 nltk.download('punkt')
 nltk.download('stopwords')
 
 ps = PorterStemmer()
+stop_words = set(stopwords.words('english'))
 
-# Function to preprocess text
 def transform_text(text):
     text = text.lower()
-    text = text.split()  # Tokenize text
+    text = text.split()
     y = []
-
-    for i in text:
-        if i.isalnum() and i not in stopwords.words('english') and i not in string.punctuation:
-            y.append(ps.stem(i))  # Stemming
-
+    for word in text:
+        if word.isalnum() and word not in stop_words and word not in string.punctuation:
+            y.append(ps.stem(word))
     return " ".join(y)
 
-# Load data (Replace 'spam.csv' with your dataset path)
+# Load dataset
 df = pd.read_csv("spam.csv", encoding='latin-1')[['v1', 'v2']]
 df.columns = ['label', 'text']
-df['label'] = df['label'].map({'ham': 0, 'spam': 1})  # 0 = ham, 1 = spam
-df['transformed'] = df['text'].apply(transform_text)  # Apply preprocessing
+df['label'] = df['label'].map({'ham': 0, 'spam': 1})
+df['transformed'] = df['text'].apply(transform_text)
 
-# Train-test split
+# Create vectorizer and fit on data
 cv = CountVectorizer()
-X = cv.fit_transform(df['transformed'])
+X = cv.fit_transform(df['transformed'])  # <-- FITTING HERE
 y = df['label']
 
+# Train-test split
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
 
 # Train model
 model = MultinomialNB()
 model.fit(X_train, y_train)
 
-# Evaluate model
-y_pred = model.predict(X_test)
-print("Model Accuracy:", accuracy_score(y_test, y_pred))
+# Evaluate and save
+print("Accuracy:", accuracy_score(y_test, model.predict(X_test)))
 
-# Save model and vectorizer
-pickle.dump(model, open("model.pkl", "wb"))
-pickle.dump(cv, open("vectorizer.pkl", "wb"))
+# ✅ Save fitted model and vectorizer
+with open("model.pkl", "wb") as f:
+    pickle.dump(model, f)
+
+with open("vectorizer.pkl", "wb") as f:
+    pickle.dump(cv, f)
