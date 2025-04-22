@@ -45,6 +45,9 @@ if st.button('Predict'):
     result = model.predict(vector_input)[0]
     st.write("Model Output:", result)
 
+    model = pickle.load(open("model.pkl", "rb"))
+    vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
+
     # Display prediction results
     if result == 1:
         st.error("🚨 Spam")
