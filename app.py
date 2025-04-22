@@ -4,6 +4,9 @@ import string
 from nltk.corpus import stopwords
 import nltk
 from nltk.stem.porter import PorterStemmer
+import nltk
+nltk.download('punkt')  # ✅ This is the key line to fix your error
+nltk.download('stopwords')  # In case you're using stopwords too
 
 ps = PorterStemmer()
 
