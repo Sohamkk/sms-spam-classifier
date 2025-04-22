@@ -1,3 +1,5 @@
+# app.py
+
 import streamlit as st
 import pickle
 import nltk
@@ -8,21 +10,34 @@ from nltk.stem.porter import PorterStemmer
 nltk.download('punkt')
 nltk.download('stopwords')
 
-# Initialize the stemmer and stopwords
 ps = PorterStemmer()
-stop_words = set(stopwords.words('english'))  # Fetch stopwords only once
 
 def transform_text(text):
     text = text.lower()
-    text = text.split()  # Tokenize text
+    text = text.split()  # ← simple tokenizer
 
-    # Remove stopwords and punctuation, then apply stemming
-    processed_text = [
-        ps.stem(word) for word in text
-        if word.isalnum() and word not in stop_words and word not in string.punctuation
-    ]
+    y = []
+    for i in text:
+        if i.isalnum():
+            y.append(i)
 
-    return " ".join(processed_text)
+    text = y[:]
+    y.clear()
+
+    for i in text:
+        if i not in stopwords.words('english') and i not in string.punctuation:
+            y.append(i)
+
+    text = y[:]
+    y.clear()
+
+    for i in text:
+        y.append(ps.stem(i))
+
+    return " ".join(y)
+
+    y = [ps.stem(word) for word in text if word.isalnum() and word not in stopwords.words('english')]
+    return " ".join(y)
 
 # Load model and vectorizer
 model = pickle.load(open("model.pkl", "rb"))
@@ -33,22 +48,15 @@ st.title("📩 Email/SMS Spam Classifier")
 input_sms = st.text_input("Enter the message")
 
 if st.button('Predict'):
-    # Preprocess input text
     transformed_sms = transform_text(input_sms)
     st.write("Transformed Text:", transformed_sms)
 
-    # Vectorize the transformed text
     vector_input = vectorizer.transform([transformed_sms])
     st.write("Vector Shape:", vector_input.shape)
 
-    # Predict result
     result = model.predict(vector_input)[0]
     st.write("Model Output:", result)
 
-    model = pickle.load(open("model.pkl", "rb"))
-    vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
-
-    # Display prediction results
     if result == 1:
         st.error("🚨 Spam")
     else:
