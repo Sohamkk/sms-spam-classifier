@@ -1,20 +1,16 @@
-# app.py
-
 import streamlit as st
 import pickle
-import nltk
 import string
 from nltk.corpus import stopwords
+import nltk
 from nltk.stem.porter import PorterStemmer
-
-nltk.download('punkt')
-nltk.download('stopwords')
 
 ps = PorterStemmer()
 
+
 def transform_text(text):
     text = text.lower()
-    text = text.split()  # ← simple tokenizer
+    text = nltk.word_tokenize(text)
 
     y = []
     for i in text:
@@ -36,29 +32,23 @@ def transform_text(text):
 
     return " ".join(y)
 
-    y = [ps.stem(word) for word in text if word.isalnum() and word not in stopwords.words('english')]
-    return " ".join(y)
+tfidf = pickle.load(open('vectorizer.pkl','rb'))
+model = pickle.load(open('model.pkl','rb'))
 
-# Load model and vectorizer
-model = pickle.load(open("model.pkl", "rb"))
-vectorizer = pickle.load(open("vectorizer.pkl", "rb"))
+st.title("Email/SMS Spam Classifier")
 
-st.title("📩 Email/SMS Spam Classifier")
-
-input_sms = st.text_input("Enter the message")
+input_sms = st.text_area("Enter the message")
 
 if st.button('Predict'):
+
+    # 1. preprocess
     transformed_sms = transform_text(input_sms)
-    st.write("Transformed Text:", transformed_sms)
-
-    vector_input = vectorizer.transform([transformed_sms])
-    st.write("Vector Shape:", vector_input.shape)
-
+    # 2. vectorize
+    vector_input = tfidf.transform([transformed_sms])
+    # 3. predict
     result = model.predict(vector_input)[0]
-    st.write("Model Output:", result)
-    vectorizer = pickle.load(open("vectorizer.pkl", "rb"))  # This works if the file was fitted!
-
+    # 4. Display
     if result == 1:
-        st.error("🚨 Spam")
+        st.header("Spam")
     else:
-        st.success("✅ Not Spam")
+        st.header("Not Spam")
