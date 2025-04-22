@@ -9,42 +9,45 @@ from sklearn.naive_bayes import MultinomialNB
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import accuracy_score
 
-# Download required NLTK data
+# Download necessary datasets
 nltk.download('punkt')
 nltk.download('stopwords')
 
 ps = PorterStemmer()
-stop_words = set(stopwords.words('english'))
 
+# Function to preprocess text
 def transform_text(text):
     text = text.lower()
-    text = text.split()
+    text = text.split()  # Tokenize text
     y = []
+
     for i in text:
-        if i.isalnum() and i not in stop_words and i not in string.punctuation:
-            y.append(ps.stem(i))
+        if i.isalnum() and i not in stopwords.words('english') and i not in string.punctuation:
+            y.append(ps.stem(i))  # Stemming
+
     return " ".join(y)
 
-# Load and preprocess the dataset
+# Load data (Replace 'spam.csv' with your dataset path)
 df = pd.read_csv("spam.csv", encoding='latin-1')[['v1', 'v2']]
 df.columns = ['label', 'text']
-df['label'] = df['label'].map({'ham': 0, 'spam': 1})
-df['transformed'] = df['text'].apply(transform_text)
+df['label'] = df['label'].map({'ham': 0, 'spam': 1})  # 0 = ham, 1 = spam
+df['transformed'] = df['text'].apply(transform_text)  # Apply preprocessing
 
-# ✅ Fit the vectorizer
+# Train-test split
 cv = CountVectorizer()
 X = cv.fit_transform(df['transformed'])
 y = df['label']
 
-# Split and train the model
 X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+# Train model
 model = MultinomialNB()
 model.fit(X_train, y_train)
 
-# Evaluate
+# Evaluate model
 y_pred = model.predict(X_test)
 print("Model Accuracy:", accuracy_score(y_test, y_pred))
 
-# ✅ Save the fitted model and vectorizer
+# Save model and vectorizer
 pickle.dump(model, open("model.pkl", "wb"))
 pickle.dump(cv, open("vectorizer.pkl", "wb"))
